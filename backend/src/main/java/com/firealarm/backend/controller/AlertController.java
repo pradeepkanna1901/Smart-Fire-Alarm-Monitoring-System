@@ -2,6 +2,7 @@ package com.firealarm.backend.controller;
 
 import com.firealarm.backend.entity.Alert;
 import com.firealarm.backend.service.AlertService;
+import com.firealarm.backend.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,9 @@ public class AlertController {
     @Autowired
     private AlertService service;
 
+    @Autowired
+    private EmailService emailService;
+
     // View all alerts
     @GetMapping
     public List<Alert> getAllAlerts() {
@@ -28,7 +32,24 @@ public class AlertController {
     // Add alert
     @PostMapping
     public Alert addAlert(@RequestBody Alert alert) {
-        return service.saveAlert(alert);
+
+        Alert savedAlert = service.saveAlert(alert);
+
+        if (alert.getSeverity() != null &&
+                alert.getSeverity().equalsIgnoreCase("Critical")) {
+
+            emailService.sendFireAlert(
+                    "🔥 FIRE ALERT - CRITICAL",
+                    "A Critical Fire Alert has been detected.\n\n"
+                            + "Location: " + alert.getLocation() + "\n"
+                            + "Alert Type: " + alert.getAlertType() + "\n"
+                            + "Severity: " + alert.getSeverity() + "\n"
+                            + "Status: " + alert.getStatus() + "\n"
+                            + "Time: " + alert.getTime()
+            );
+        }
+
+        return savedAlert;
     }
 
     // Update alert

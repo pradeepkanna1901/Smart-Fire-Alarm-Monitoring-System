@@ -1,4 +1,13 @@
 import { useEffect, useState } from "react";
+import {
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import Notification from "../components/Notification";
@@ -15,8 +24,14 @@ export default function Dashboard() {
   });
 
   useEffect(() => {
+  loadDashboard();
+
+  const interval = setInterval(() => {
     loadDashboard();
-  }, []);
+  }, 5000); // Refresh every 5 seconds
+
+  return () => clearInterval(interval);
+}, []);
 
   const loadDashboard = async () => {
     try {
@@ -44,7 +59,16 @@ export default function Dashboard() {
         >
           <Notification alerts={dashboard.totalAlerts} />
 
-          <h1>🔥 Smart Fire Alarm Monitoring System</h1>
+          <h1
+  style={{
+    fontSize: "42px",
+    textAlign: "center",
+    lineHeight: "1.2",
+    marginBottom: "10px",
+  }}
+>
+  🔥 Smart Fire Alarm Monitoring System
+</h1>
 
           <p>Real-Time Monitoring Dashboard</p>
 

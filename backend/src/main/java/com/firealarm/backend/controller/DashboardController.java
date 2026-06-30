@@ -35,6 +35,8 @@ public class DashboardController {
         data.put("totalSensors", sensorRepository.count());
         data.put("totalAlerts", alertRepository.count());
         data.put("totalIncidents", incidentRepository.count());
+
+        // Add this line
         data.put("systemStatus", "ONLINE");
 
         return data;

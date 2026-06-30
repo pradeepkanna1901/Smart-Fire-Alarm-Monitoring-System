@@ -1,5 +1,3 @@
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import { useEffect, useState } from "react";
 import {
   getReports,
@@ -51,7 +49,7 @@ export default function Reports() {
       loadReports();
     } catch (error) {
       console.log(error);
-      alert("❌ Failed to add report");
+      alert("Failed to add report");
     }
   };
 
@@ -86,7 +84,7 @@ export default function Reports() {
       loadReports();
     } catch (error) {
       console.log(error);
-      alert("❌ Update Failed");
+      alert("Update Failed");
     }
   };
 
@@ -99,42 +97,35 @@ export default function Reports() {
       loadReports();
     } catch (error) {
       console.log(error);
-      alert("❌ Delete Failed");
+      alert("Delete Failed");
     }
   };
 
-  const downloadPDF = () => {
-  const doc = new jsPDF();
+  const filteredReports = reports.filter((report) =>
+    report.reportName.toLowerCase().includes(search.toLowerCase())
+  );
 
-  doc.setFontSize(18);
-  doc.text("Fire Alarm Monitoring System", 14, 15);
-
-  doc.setFontSize(12);
-  doc.text("Reports", 14, 25);
-
-  autoTable(doc, {
-    startY: 35,
-    head: [[
-      "ID",
-      "Report Name",
-      "Report Type",
-      "Generated Date",
-      "Status"
-    ]],
-    body: reports.map((report) => [
-      report.id,
-      report.reportName,
-      report.reportType,
-      report.generatedDate,
-      report.status,
-    ]),
-  });
-
-  doc.save("FireAlarmReports.pdf");
+  const downloadBackendPdf = () => {
+    window.open("http://localhost:8080/api/reports/pdf", "_blank");
+  };
+  const downloadExcel = () => {
+  window.open("http://localhost:8080/api/reports/excel", "_blank");
 };
-const filteredReports = reports.filter((report) =>
-  report.reportName.toLowerCase().includes(search.toLowerCase())
-);
+  
+
+const sendEmail = async () => {
+    try {
+        const response = await fetch("http://localhost:8080/api/reports/email");
+
+        const message = await response.text();
+        alert(message);
+    } catch (error) {
+        console.error(error);
+        alert("Failed to send email");
+    }
+};
+
+
   return (
     <div
       style={{
@@ -148,27 +139,61 @@ const filteredReports = reports.filter((report) =>
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          marginBottom: "25px",
+          marginBottom: "20px",
         }}
       >
         <div>
-  <h1>📄 Report Management</h1>
+          <h1>📄 Report Management</h1>
 
-  <button
-    onClick={downloadPDF}
+          <button
+            onClick={downloadBackendPdf}
+            style={{
+              marginTop: "10px",
+              background: "#1976d2",
+              color: "white",
+              border: "none",
+              padding: "10px 18px",
+              borderRadius: "6px",
+              cursor: "pointer",
+            }}
+            
+            
+            
+          >
+            📄 Download PDF
+          </button>
+         
+          <button
+  onClick={downloadExcel}
+  style={{
+    marginTop: "10px",
+    marginLeft: "10px",
+    background: "#2e7d32",
+    color: "white",
+    border: "none",
+    padding: "10px 18px",
+    borderRadius: "6px",
+    cursor: "pointer",
+  }}
+>
+  📊 Download Excel
+</button>
+ <button
+    onClick={sendEmail}
     style={{
-      marginTop: "10px",
-      background: "#1976d2",
-      color: "white",
-      border: "none",
-      padding: "10px 18px",
-      borderRadius: "6px",
-      cursor: "pointer",
+        marginTop: "10px",
+        marginLeft: "10px",
+        background: "#28a745",
+        color: "white",
+        border: "none",
+        padding: "10px 18px",
+        borderRadius: "6px",
+        cursor: "pointer",
     }}
-  >
-    📄 Download PDF
-  </button>
-</div>
+>
+    📧 Send Email
+</button>
+        </div>
 
         <input
           type="text"
@@ -194,30 +219,45 @@ const filteredReports = reports.filter((report) =>
         }}
       >
         <h2>
-          {isEditing ? "✏️ Update Report" : "➕ Add New Report"}
+          {isEditing ? "✏️ Update Report" : "➕ Add Report"}
         </h2>
-                <div
+
+        <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(2,1fr)",
             gap: "15px",
             marginTop: "20px",
           }}
-        >
-          <input
+        >          <input
             type="text"
             placeholder="Report Name"
             value={newReport.reportName}
             onChange={(e) =>
-              setNewReport({ ...newReport, reportName: e.target.value })
+              setNewReport({
+                ...newReport,
+                reportName: e.target.value,
+              })
             }
+            style={{
+              padding: "10px",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+            }}
           />
 
           <select
             value={newReport.reportType}
             onChange={(e) =>
-              setNewReport({ ...newReport, reportType: e.target.value })
+              setNewReport({
+                ...newReport,
+                reportType: e.target.value,
+              })
             }
+            style={{
+              padding: "10px",
+              borderRadius: "8px",
+            }}
           >
             <option>Fire Report</option>
             <option>Sensor Report</option>
@@ -234,13 +274,25 @@ const filteredReports = reports.filter((report) =>
                 generatedDate: e.target.value,
               })
             }
+            style={{
+              padding: "10px",
+              borderRadius: "8px",
+              border: "1px solid #ccc",
+            }}
           />
 
           <select
             value={newReport.status}
             onChange={(e) =>
-              setNewReport({ ...newReport, status: e.target.value })
+              setNewReport({
+                ...newReport,
+                status: e.target.value,
+              })
             }
+            style={{
+              padding: "10px",
+              borderRadius: "8px",
+            }}
           >
             <option>Generated</option>
             <option>Pending</option>
@@ -284,11 +336,14 @@ const filteredReports = reports.filter((report) =>
         </thead>
 
         <tbody>
-          {filteredReports.map((report) => (
+                    {filteredReports.map((report) => (
             <tr key={report.id}>
               <td style={tdStyle}>{report.id}</td>
+
               <td style={tdStyle}>{report.reportName}</td>
+
               <td style={tdStyle}>{report.reportType}</td>
+
               <td style={tdStyle}>{report.generatedDate}</td>
 
               <td
@@ -343,7 +398,6 @@ const filteredReports = reports.filter((report) =>
     </div>
   );
 }
-
 const thStyle = {
   padding: "14px",
   textAlign: "center",

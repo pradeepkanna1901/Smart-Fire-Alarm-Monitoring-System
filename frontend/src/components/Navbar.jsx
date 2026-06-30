@@ -4,8 +4,11 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   const logout = () => {
+    // Remove login session
     localStorage.removeItem("loggedIn");
-    navigate("/login");
+
+    // Redirect to Login page
+    navigate("/");
   };
 
   return (
@@ -23,7 +26,13 @@ export default function Navbar() {
     >
       <h2>🔥 Smart Fire Alarm Monitoring System</h2>
 
-      <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "20px",
+        }}
+      >
         <span>Welcome, Admin</span>
 
         <button
@@ -36,9 +45,16 @@ export default function Navbar() {
             borderRadius: "8px",
             cursor: "pointer",
             fontWeight: "bold",
+            transition: "0.3s",
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.background = "#f5f5f5";
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.background = "white";
           }}
         >
-          Logout
+          🚪 Logout
         </button>
       </div>
     </div>

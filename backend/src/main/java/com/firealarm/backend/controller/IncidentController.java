@@ -2,6 +2,7 @@ package com.firealarm.backend.controller;
 
 import com.firealarm.backend.entity.Incident;
 import com.firealarm.backend.service.IncidentService;
+import com.firealarm.backend.service.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,9 @@ public class IncidentController {
     @Autowired
     private IncidentService service;
 
+    @Autowired
+    private NotificationService notificationService;
+
     // View all incidents
     @GetMapping
     public List<Incident> getAllIncidents() {
@@ -28,7 +32,19 @@ public class IncidentController {
     // Add incident
     @PostMapping
     public Incident addIncident(@RequestBody Incident incident) {
-        return service.saveIncident(incident);
+
+        Incident savedIncident = service.saveIncident(incident);
+
+        notificationService.sendNotification(
+                "🚨 New Fire Incident: "
+                        + savedIncident.getIncidentType()
+                        + " | "
+                        + savedIncident.getLocation()
+                        + " | "
+                        + savedIncident.getSeverity()
+        );
+
+        return savedIncident;
     }
 
     // Update incident

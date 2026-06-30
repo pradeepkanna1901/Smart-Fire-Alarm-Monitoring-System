@@ -13,14 +13,55 @@ public class IncidentService {
     @Autowired
     private IncidentRepository repository;
 
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private NotificationService notificationService;
+
     // Get all incidents
     public List<Incident> getAllIncidents() {
         return repository.findAll();
     }
 
-    // Add incident
+    // Add incident, send email and live notification
     public Incident saveIncident(Incident incident) {
-        return repository.save(incident);
+
+        Incident savedIncident = repository.save(incident);
+
+        // ===========================
+        // Send Email
+        // ===========================
+
+        String subject = "🚨 FIRE INCIDENT ALERT";
+
+        String message =
+                "A new fire incident has been reported.\n\n" +
+                "====================================\n" +
+                "Incident Type : " + savedIncident.getIncidentType() + "\n" +
+                "Location      : " + savedIncident.getLocation() + "\n" +
+                "Severity      : " + savedIncident.getSeverity() + "\n" +
+                "Status        : " + savedIncident.getStatus() + "\n" +
+                "Reported Time : " + savedIncident.getReportedTime() + "\n" +
+                "====================================\n\n" +
+                "Please take immediate action.\n\n" +
+                "Smart Fire Alarm Monitoring System";
+
+        emailService.sendFireAlert(subject, message);
+
+        // ===========================
+        // Send Live Notification
+        // ===========================
+
+        notificationService.sendNotification(
+                "🚨 FIRE INCIDENT!\n\n" +
+                "Type: " + savedIncident.getIncidentType() +
+                "\nLocation: " + savedIncident.getLocation() +
+                "\nSeverity: " + savedIncident.getSeverity() +
+                "\nStatus: " + savedIncident.getStatus()
+        );
+
+        return savedIncident;
     }
 
     // Update incident

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import {
   FaBell,
   FaThermometerHalf,
@@ -6,6 +7,28 @@ import {
 } from "react-icons/fa";
 
 export default function StatCard({ title, value, color }) {
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (typeof value !== "number") return;
+
+    let current = 0;
+    const increment = 1;
+
+    const timer = setInterval(() => {
+      current += increment;
+
+      if (current >= value) {
+        current = value;
+        clearInterval(timer);
+      }
+
+      setCount(current);
+    }, 10);
+
+    return () => clearInterval(timer);
+  }, [value]);
+
   const getIcon = () => {
     switch (title) {
       case "Active Alerts":
@@ -35,6 +58,17 @@ export default function StatCard({ title, value, color }) {
         boxShadow: "0 10px 25px rgba(0,0,0,.12)",
         borderTop: `6px solid ${color}`,
         transition: "0.3s",
+        cursor: "pointer",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.transform = "translateY(-8px)";
+        e.currentTarget.style.boxShadow =
+          "0 18px 35px rgba(0,0,0,.20)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.transform = "translateY(0)";
+        e.currentTarget.style.boxShadow =
+          "0 10px 25px rgba(0,0,0,.12)";
       }}
     >
       <div
@@ -56,13 +90,24 @@ export default function StatCard({ title, value, color }) {
           </h3>
 
           <h1
-            style={{
-              marginTop: "15px",
-              fontSize: "58px",
-              color: "#111827",
-            }}
+
+  style={{
+
+    marginTop: "15px",
+
+    fontSize:
+
+      title === "System Status"
+
+        ? "42px"
+
+        : "58px",
+
+    color: "#111827",
+
+  }}
           >
-            {value}
+            {typeof value === "number" ? count : value}
           </h1>
         </div>
 
